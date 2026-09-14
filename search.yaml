@@ -1,0 +1,25 @@
+# Optuna search definition, driven by src/tune.py.
+#
+# Kept out of params.yaml on purpose: DVC tracks params.yaml per-key, and
+# nothing here should ever look like a change to a pipeline stage's inputs.
+# Widening a range re-runs the study, not the cached stages.
+
+study_name: digits-tpe
+n_trials: 25
+seed: 17
+# storage: sqlite:///optuna.db   # uncomment to make the study resumable
+
+objective:
+  metric: metrics/valid.json:logloss
+  direction: minimize
+
+# Keys are dotted DVC parameter paths, passed straight to `dvc exp run -S`.
+# Each value is a trial.suggest_* call: `type` picks the method, the rest are
+# forwarded as keyword arguments.
+space:
+  train.learning_rate:     {type: float, low: 0.01, high: 0.5, log: true}
+  train.l2_regularization: {type: float, low: 1.0e-8, high: 10.0, log: true}
+  train.max_iter:          {type: int, low: 50, high: 400, step: 50}
+  train.max_depth:         {type: int, low: 2, high: 12}
+  train.min_samples_leaf:  {type: int, low: 5, high: 50}
+  train.max_leaf_nodes:    {type: categorical, choices: [15, 31, 63]}
