@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   prepare:
-    cmd: python src/prepare.py
+    cmd: uv run python src/prepare.py
     deps:
     - path: src/prepare.py
       hash: md5
@@ -27,7 +27,7 @@ stages:
       md5: ceb186ef26320096d605d6122daf1dcc
       size: 99770
   train:
-    cmd: python src/train.py
+    cmd: uv run python src/train.py
     deps:
     - path: data/train.csv
       hash: md5
@@ -43,8 +43,8 @@ stages:
       size: 1018
     - path: src/train.py
       hash: md5
-      md5: 9648222ff8e4edbba51cb721d56b3080
-      size: 1148
+      md5: 6fd135fe5a5ec9197d9c36ff590ffa4b
+      size: 1076
     params:
       params.yaml:
         train:
@@ -65,7 +65,7 @@ stages:
       md5: 7b43eba01081483647945bc21a51b149
       size: 993296
   evaluate:
-    cmd: python src/evaluate.py
+    cmd: uv run python src/evaluate.py
     deps:
     - path: data/test.csv
       hash: md5
@@ -81,8 +81,8 @@ stages:
       size: 1018
     - path: src/evaluate.py
       hash: md5
-      md5: f579e8049056bdaa28d240de20ed4e0b
-      size: 395
+      md5: 14405d69481062416b10fb04ec27bef5
+      size: 297
     outs:
     - path: metrics/test.json
       hash: md5

@@ -1,6 +1,6 @@
 stages:
   prepare:
-    cmd: python src/prepare.py
+    cmd: uv run python src/prepare.py
     deps:
       - src/prepare.py
     params:
@@ -11,7 +11,7 @@ stages:
       - data/test.csv
 
   train:
-    cmd: python src/train.py
+    cmd: uv run python src/train.py
     deps:
       - src/train.py
       - src/common.py
@@ -26,7 +26,7 @@ stages:
           cache: false
 
   evaluate:
-    cmd: python src/evaluate.py
+    cmd: uv run python src/evaluate.py
     deps:
       - src/evaluate.py
       - src/common.py

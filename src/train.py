@@ -1,14 +1,12 @@
 """Fit a gradient-boosted classifier and score it on the validation split."""
 
-import sys
 from pathlib import Path
 
 import joblib
 import yaml
 from sklearn.ensemble import HistGradientBoostingClassifier
 
-sys.path.insert(0, str(Path(__file__).parent))
-from common import MODEL_PATH, load_split, score, write_metrics  # noqa: E402
+from common import MODEL_PATH, load_split, score, write_metrics
 
 
 def build_model(params: dict) -> HistGradientBoostingClassifier:

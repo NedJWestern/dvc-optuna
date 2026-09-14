@@ -1,6 +1,0 @@
-dvc>=3.0
-joblib
-optuna
-pandas
-pyyaml
-scikit-learn

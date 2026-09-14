@@ -1,0 +1,25 @@
+[project]
+name = "dvc-optuna"
+version = "0.1.0"
+description = "A minimal DVC training pipeline, tuned by an Optuna study"
+requires-python = ">=3.12"
+dependencies = [
+    "dvc>=3.0",
+    "joblib",
+    "optuna>=4.0",
+    "pandas",
+    "pyyaml",
+    "scikit-learn",
+]
+
+[dependency-groups]
+dev = ["ruff"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I", "UP", "B"]
