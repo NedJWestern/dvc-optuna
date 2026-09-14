@@ -37,26 +37,30 @@ uv run dvc exp show       # compare experiments
 
 ## Tuning
 
-`src/tune.py` runs an Optuna study over that pipeline. Each trial passes its
-sampled values to `dvc exp run -S`: DVC writes them into `params.yaml`, re-runs
-only the affected stages, and records the result as a named experiment. The
-objective is then read back out of the metrics file the pipeline produced.
+`src/tune.py` runs an Optuna study over that pipeline. Each trial writes its
+sampled values into `params.yaml` and calls `Repo.reproduce()` in-process, so DVC
+re-runs only the affected stages and the objective is read from the metrics file
+that stage produced. The committed parameters are restored when the study ends,
+including on `Ctrl-C`.
 
 ```bash
 uv run python src/tune.py
-uv run dvc exp apply digits-tpe-024   # adopt a trial's parameters
 ```
+
+No DVC experiment is recorded per trial. Optuna's storage holds the study, and
+the run prints the `dvc exp run -S ...` command that replays the best trial and
+records it as an experiment.
 
 The search is declared in `search.yaml`, kept separate from `params.yaml` so
 that editing a sweep can never look like a change to a stage's inputs.
 
 | Field | Meaning |
 | --- | --- |
-| `space` keys | Dotted DVC parameter paths, passed straight through to `-S` |
+| `space` keys | Dotted DVC parameter paths, written straight into `params.yaml` |
 | `space` values | A `trial.suggest_*` call — `type` picks the method, the remaining keys are forwarded as keyword arguments |
 | `objective.metric` | `<metrics file>:<dotted key>` |
 | `objective.direction` | `minimize` or `maximize` |
-| `storage` | Optional Optuna storage URL; set it to make a study resumable |
+| `storage` | Optuna storage URL. This is the only record of the study, so it also makes a study resumable — trial numbering continues rather than restarting |
 
 Anything Optuna accepts (`log`, `step`, `choices`) therefore works without
 touching `tune.py`.
@@ -65,8 +69,9 @@ touching `tune.py`.
 
 | Limit | Detail |
 | --- | --- |
-| Per-trial overhead | A few seconds of git and hashing, which dominates when a stage runs as quickly as this one |
-| Pruning | Unavailable — a trial is an opaque subprocess, so there is no intermediate value to report back to Optuna |
+| Per-trial overhead | ~1.4s of DVC bookkeeping on top of the stages themselves, which is significant when a stage runs as quickly as this one |
+| Pruning | Unavailable — a stage is an opaque subprocess, so there is no intermediate value to report back to Optuna |
+| Workspace | Trials run in the working tree, so `params.yaml`, `metrics/` and `dvc.lock` all churn for the duration of a study |
 | Validation size | 360 rows, small enough for a long study to start fitting the split itself |
 
 That last one is not hypothetical. A 25-trial study improved validation logloss

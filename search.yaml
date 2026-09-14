@@ -7,7 +7,7 @@
 study_name: digits-tpe
 n_trials: 25
 seed: 17
-# storage: sqlite:///optuna.db   # uncomment to make the study resumable
+storage: sqlite:///optuna.db
 
 objective:
   metric: metrics/valid.json:logloss
