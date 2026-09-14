@@ -1,0 +1,90 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: src/prepare.py
+      hash: md5
+      md5: 83117a88644afca478d8a7c65c5ecb90
+      size: 1135
+    params:
+      params.yaml:
+        prepare:
+          test_size: 0.2
+          valid_size: 0.2
+          seed: 42
+    outs:
+    - path: data/test.csv
+      hash: md5
+      md5: 34994b9eb3aec4c91c846951667825e8
+      size: 99723
+    - path: data/train.csv
+      hash: md5
+      md5: 816cebba0ebef6d4d332d28b49687b99
+      size: 297176
+    - path: data/valid.csv
+      hash: md5
+      md5: ceb186ef26320096d605d6122daf1dcc
+      size: 99770
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/train.csv
+      hash: md5
+      md5: 816cebba0ebef6d4d332d28b49687b99
+      size: 297176
+    - path: data/valid.csv
+      hash: md5
+      md5: ceb186ef26320096d605d6122daf1dcc
+      size: 99770
+    - path: src/common.py
+      hash: md5
+      md5: ae0d9d83f2dffd614a35c5bc068a2c73
+      size: 1018
+    - path: src/train.py
+      hash: md5
+      md5: 9648222ff8e4edbba51cb721d56b3080
+      size: 1148
+    params:
+      params.yaml:
+        train:
+          max_iter: 100
+          learning_rate: 0.1
+          max_depth: 3
+          max_leaf_nodes: 31
+          min_samples_leaf: 20
+          l2_regularization: 0.0
+          seed: 42
+    outs:
+    - path: metrics/valid.json
+      hash: md5
+      md5: 5312ec08065396176c2309fc3251a5b6
+      size: 103
+    - path: model/model.joblib
+      hash: md5
+      md5: 7b43eba01081483647945bc21a51b149
+      size: 993296
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/test.csv
+      hash: md5
+      md5: 34994b9eb3aec4c91c846951667825e8
+      size: 99723
+    - path: model/model.joblib
+      hash: md5
+      md5: 7b43eba01081483647945bc21a51b149
+      size: 993296
+    - path: src/common.py
+      hash: md5
+      md5: ae0d9d83f2dffd614a35c5bc068a2c73
+      size: 1018
+    - path: src/evaluate.py
+      hash: md5
+      md5: f579e8049056bdaa28d240de20ed4e0b
+      size: 395
+    outs:
+    - path: metrics/test.json
+      hash: md5
+      md5: f1c9929ee093b9c7110244f083bca954
+      size: 105
