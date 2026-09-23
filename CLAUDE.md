@@ -14,6 +14,7 @@ model worth caring about.
 | `params.yaml` | Stage inputs; DVC tracks these per-key |
 | `search.yaml` | The Optuna search space |
 | `src/tune.py` | The glue |
+| `docs/` | Rationale and behaviour notes, all linked from `README.md` |
 
 Keep `search.yaml` out of `params.yaml`, and never add it to a stage's `params:`
 list. If DVC can see the search space as a stage input, widening a range
