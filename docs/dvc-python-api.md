@@ -4,14 +4,13 @@
 
 Each trial calls `Repo.reproduce()` in-process. The first version of `tune.py`
 instead ran `dvc exp run -S` per trial, recording each trial as a named DVC
-experiment. That was dropped: the experiment bookkeeping cost time and caused
-problems that the study never needed solved.
+experiment. That was dropped: the experiment bookkeeping caused problems
+that the study never needed solved.
 
 ## Problems with `dvc exp run` per trial
 
 | Problem | Cause |
 | --- | --- |
-| Per-trial overhead | ~1.4s of experiment bookkeeping per trial, large next to stages this fast |
 | Name collisions | Experiment names are scoped to the baseline commit, so a second study reused the first study's names |
 | Ref sprawl | Every trial left a git ref under `.git/refs/exps/` |
 | Results disappearing | Experiments are listed under their baseline commit, so after the next commit plain `dvc exp show` no longer lists them (`--all-commits` still does) |
