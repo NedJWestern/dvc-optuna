@@ -14,56 +14,18 @@ uv sync
 UCI *Optical Recognition of Handwritten Digits*, shipped with scikit-learn:
 1797 samples, 64 features, 10 classes. Nothing is downloaded.
 
-## Pipeline
-
-`prepare` → `train` → `evaluate`, defined in `dvc.yaml`.
-
-| Stage | Script | Outputs |
-| --- | --- | --- |
-| `prepare` | `src/prepare.py` | `data/{train,valid,test}.csv` |
-| `train` | `src/train.py` | `model/model.joblib`, `metrics/valid.json` |
-| `evaluate` | `src/evaluate.py` | `metrics/test.json` |
-
-The model is a `HistGradientBoostingClassifier`. Its hyperparameters live in
-`params.yaml`, so DVC re-runs only the stages a change actually affects.
-`metrics/valid.json` is the tuning signal; `metrics/test.json` comes from the
-held-out split and should only be read once a configuration has been chosen.
-
-```bash
-uv run dvc repro          # run the pipeline
-uv run dvc metrics show   # current metrics
-uv run dvc exp show       # compare experiments
-```
-
 ## Tuning
 
-`src/tune.py` runs an Optuna study over that pipeline. Each trial writes its
-sampled values into `params.yaml` and calls `Repo.reproduce()` in-process, so DVC
-re-runs only the affected stages and the objective is read from the metrics file
-that stage produced. The committed parameters are restored when the study ends,
-including on `Ctrl-C`.
+`src/tune.py` runs an Optuna study over the pipeline, configured by `search.yaml`.
+The committed parameters are restored when the study ends, including on `Ctrl-C`.
 
 ```bash
 uv run python src/tune.py
 ```
 
-No DVC experiment is recorded per trial. Optuna's storage holds the study, and
-the run prints the `dvc exp run -S ...` command that replays the best trial and
-records it as an experiment.
-
-The search is declared in `search.yaml`, kept separate from `params.yaml` so
-that editing a sweep can never look like a change to a stage's inputs.
-
-| Field | Meaning |
-| --- | --- |
-| `space` keys | Dotted DVC parameter paths, written straight into `params.yaml` |
-| `space` values | A `trial.suggest_*` call — `type` picks the method, the remaining keys are forwarded as keyword arguments |
-| `objective.metric` | `<metrics file>:<dotted key>` |
-| `objective.direction` | `minimize` or `maximize` |
-| `storage` | Optuna storage URL. This is the only record of the study, so it also makes a study resumable — trial numbering continues rather than restarting |
-
-Anything Optuna accepts (`log`, `step`, `choices`) therefore works without
-touching `tune.py`.
+The run ends by printing the `dvc exp run -S ...` command that replays the best
+trial as a DVC experiment. The Optuna `storage` URL is the only record of the
+study, and makes it resumable — trial numbering continues rather than restarting.
 
 ## Limits
 
